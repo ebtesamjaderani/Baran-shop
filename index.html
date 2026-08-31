@@ -95,11 +95,11 @@ const defaultProducts=[
 {name:"ست قاشق و چنگال پذیرایی",cat:"قاشق و چنگال",price:"۷۶۰,۰۰۰",emoji:"🍴"},
 {name:"کتری و قوری دم‌نوش",cat:"کتری و دم‌نوش",price:"۶۸۰,۰۰۰",emoji:"🫖"},
 {name:"ظرف نگهداری حبوبات",cat:"بانکه و ظروف نگهدارنده",price:"۲۱۰,۰۰۰",emoji:"🥫"}];
-let products=JSON.parse(localStorage.getItem('baran_products')||'null')||defaultProducts;
+let products=JSON.parse(localStorage.getItem('baran_products')||'null')||defaultProducts; products=products.map(p=>({...p,stock:p.stock ?? 10}));
 let cart=0;
 function saveProducts(){localStorage.setItem('baran_products',JSON.stringify(products));}
-function render(list=products){const grid=document.querySelector('#productGrid'); if(!grid)return; grid.innerHTML=list.map(p=>`<article class="product"><div class="pic">${p.image?`<img src="${p.image}" alt="${p.name}">`:p.emoji||'🛍️'}</div><h3>${p.name}</h3><small>${p.cat}</small><div class="price">${p.price} تومان</div><button class="add" onclick="addToCart('${String(p.name).replace(/'/g,"\'")}')">افزودن به سبد خرید 🛒</button></article>`).join('');}
-function addToCart(name){cart++;const c=document.querySelector('#cartCount');if(c)c.textContent=cart.toLocaleString('fa-IR');showToast('«'+name+'» به سبد خرید اضافه شد');}
+function render(list=products){const grid=document.querySelector('#productGrid'); if(!grid)return; grid.innerHTML=list.map(p=>`<article class="product"><div class="pic">${p.image?`<img src="${p.image}" alt="${p.name}">`:p.emoji||'🛍️'}</div><h3>${p.name}</h3><small>${p.cat}</small><div class="price">${p.price} تومان</div><div class="stock">${Number(p.stock ?? 0) > 0 ? (Number(p.stock ?? 0) <= 3 ? 'فقط ' + Number(p.stock).toLocaleString('fa-IR') + ' عدد باقی مانده' : 'موجودی: ' + Number(p.stock).toLocaleString('fa-IR') + ' عدد') : 'ناموجود'}</div><button class="add" ${Number(p.stock ?? 0) <= 0 ? 'disabled' : ''} onclick="addToCart('${String(p.name).replace(/'/g,"\'")}')">افزودن به سبد خرید 🛒</button></article>`).join('');}
+function addToCart(name){const p=products.find(x=>x.name===name);if(p && Number(p.stock||0)<=0){showToast('این محصول ناموجود است');return;}if(p){p.stock=Number(p.stock||0)-1;saveProducts();render();}cart++;const c=document.querySelector('#cartCount');if(c)c.textContent=cart.toLocaleString('fa-IR');showToast('«'+name+'» به سبد خرید اضافه شد');}
 function showToast(t){const x=document.querySelector('#toast');if(!x)return;x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2200)}
 function filterCategory(cat){render(products.filter(p=>p.cat===cat));document.querySelector('#products')?.scrollIntoView({behavior:'smooth'});}
 function resetProducts(){render()}
