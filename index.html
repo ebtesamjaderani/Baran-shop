@@ -9,7 +9,7 @@
 <body>
 <header>
   <div class="topbar">
-    <span>پشتیبانی و ثبت سفارش: ۰۹۱۲-۱۲۳۴۵۶۷۸</span>
+    <span>پشتیبانی و ثبت سفارش: ۰۹۰۲۳۰۳۰۶۲۵ | ۰۹۰۲۳۰۳۰۶۲۴</span>
     <span>پیگیری سفارش</span>
     <span>راهنما و سوالات</span>
   </div>
@@ -27,6 +27,7 @@
     <a href="#products">پرفروش‌ها</a>
     <a href="#new">محصولات جدید</a>
     <a href="#offers">تخفیف‌ها</a>
+    <a href="#shipping">روش‌های ارسال</a>
     <a href="#contact">تماس با ما</a>
   </nav>
 </header>
@@ -65,6 +66,8 @@
     <div id="productGrid" class="products"></div>
   </section>
 
+  <section id="shipping" class="section"><h2>روش‌های ارسال</h2><div class="shipping-info"><div>📦 <b>پست</b><small>ارسال سفارش به سراسر کشور</small></div><div>🚚 <b>تیپاکس</b><small>ارسال برای شهرهای تحت پوشش</small></div><div>🛵 <b>پیک</b><small>ارسال داخل تهران در صورت امکان</small></div></div></section>
+
   <section id="new" class="section">
     <h2>چرا فروشگاه باران؟</h2>
     <div class="benefits">
@@ -78,7 +81,7 @@
 
 <footer id="contact">
   <div><h3>فروشگاه باران</h3><p>لوازم آشپزخانه، پلاسکو و ظروف کاربردی</p></div>
-  <div><h3>ارتباط با ما</h3><p>تلفن: ۰۹۱۲-۱۲۳۴۵۶۷۸</p><p>پشتیبانی: هر روز ۹ تا ۲۱</p></div>
+  <div><h3>ارتباط با ما</h3><p>تماس: ۰۹۰۲۳۰۳۰۶۲۵</p><p>تماس: ۰۹۰۲۳۰۳۰۶۲۴</p><p>پشتیبانی: هر روز ۹ تا ۲۱</p></div>
   <div><h3>دسترسی سریع</h3><p>محصولات جدید · پرفروش‌ها · تخفیف‌ها</p></div>
 </footer>
 
@@ -98,8 +101,8 @@ function cartTotal(){return cartItems.reduce((total,x)=>{const i=Number(x.produc
 function showCart(){let html='<h2>🛒 سبد خرید</h2>';if(!cartItems.length)html+='<p>سبد خرید خالی است.</p>';else{html+='<div>';cartItems.forEach((x,idx)=>{const p=products[x.productIndex];if(!p)return;html+=`<div style="padding:10px 0;border-bottom:1px solid #ddd"><b>${p.name}</b><br>تعداد: ${x.qty} × ${p.price} تومان <button onclick="changeQty(${idx},-1)">−</button> <button onclick="changeQty(${idx},1)">+</button> <button onclick="removeCart(${idx})">حذف</button></div>`});html+=`</div><h3>جمع کل: ${money(cartTotal())} تومان</h3><button class="btn" onclick="checkout()">ادامه و ثبت سفارش 💳</button>`}const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;padding:30px 15px;overflow:auto';box.innerHTML=`<div style="background:white;max-width:600px;margin:auto;padding:22px;border-radius:18px;position:relative"><button onclick="this.closest('div').parentElement.remove()" style="position:absolute;left:12px;top:10px">✕</button>${html}</div>`;document.body.appendChild(box);}
 function changeQty(idx,d){const item=cartItems[idx],p=products[item.productIndex];if(!p)return;if(d>0&&item.qty>=Number(p.stock||0))return showToast('بیشتر از موجودی نمی‌توانید انتخاب کنید');item.qty+=d;if(item.qty<=0)cartItems.splice(idx,1);saveCart();document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});showCart();updateCartCount();}
 function removeCart(idx){cartItems.splice(idx,1);saveCart();document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});showCart();updateCartCount();}
-function checkout(){document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;padding:20px 12px;overflow:auto';box.innerHTML=`<div style="background:white;max-width:600px;margin:auto;padding:22px;border-radius:18px"><h2>🧾 ثبت سفارش</h2><input id="cname" placeholder="نام و نام خانوادگی" style="width:100%;padding:12px;margin:6px 0"><input id="phone" placeholder="شماره موبایل" style="width:100%;padding:12px;margin:6px 0"><textarea id="address" placeholder="آدرس کامل ارسال" style="width:100%;padding:12px;margin:6px 0"></textarea><input id="postalCode" inputmode="numeric" maxlength="10" placeholder="کد پستی ۱۰ رقمی" style="width:100%;padding:12px;margin:6px 0"><p><b>مبلغ قابل پرداخت: ${money(cartTotal())} تومان</b></p><button class="btn" onclick="fakePayment()">پرداخت آنلاین 💳</button><button onclick="this.closest('div').parentElement.remove()">انصراف</button></div>`;document.body.appendChild(box);}
-function fakePayment(){const name=document.querySelector('#cname').value.trim(),phone=document.querySelector('#phone').value.trim(),address=document.querySelector('#address').value.trim(),postal=document.querySelector('#postalCode').value.trim();const normalizedPostal=postal.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));if(!name||!phone||!address||!postal)return showToast('لطفاً اطلاعات سفارش را کامل کنید');if(!/^\d{10}$/.test(normalizedPostal))return showToast('کد پستی باید ۱۰ رقم باشد');for(const x of cartItems){const p=products[x.productIndex];if(!p||x.qty>Number(p.stock||0))return showToast('موجودی یکی از کالاها کافی نیست')}cartItems.forEach(x=>{products[x.productIndex].stock=Number(products[x.productIndex].stock||0)-x.qty});saveProducts();cartItems=[];saveCart();document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});showToast('سفارش آزمایشی ثبت شد؛ درگاه واقعی در مرحله بعد متصل می‌شود');render();}
+function checkout(){document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;padding:20px 12px;overflow:auto';box.innerHTML=`<div style="background:white;max-width:600px;margin:auto;padding:22px;border-radius:18px"><h2>🧾 ثبت سفارش</h2><input id="cname" placeholder="نام و نام خانوادگی" style="width:100%;padding:12px;margin:6px 0"><input id="phone" placeholder="شماره موبایل" style="width:100%;padding:12px;margin:6px 0"><textarea id="address" placeholder="آدرس کامل ارسال" style="width:100%;padding:12px;margin:6px 0"></textarea><input id="postalCode" inputmode="numeric" maxlength="10" placeholder="کد پستی ۱۰ رقمی" style="width:100%;padding:12px;margin:6px 0"><select id="shippingMethod" style="width:100%;padding:12px;margin:6px 0"><option value="پست">روش ارسال: پست</option><option value="تیپاکس">روش ارسال: تیپاکس</option><option value="پیک تهران">روش ارسال: پیک تهران</option></select><p><b>مبلغ قابل پرداخت: ${money(cartTotal())} تومان</b></p><button class="btn" onclick="fakePayment()">پرداخت آنلاین 💳</button><button onclick="this.closest('div').parentElement.remove()">انصراف</button></div>`;document.body.appendChild(box);}
+function fakePayment(){const name=document.querySelector('#cname').value.trim(),phone=document.querySelector('#phone').value.trim(),address=document.querySelector('#address').value.trim(),postal=document.querySelector('#postalCode').value.trim(),shipping=document.querySelector('#shippingMethod').value;const normalizedPostal=postal.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));if(!name||!phone||!address||!postal)return showToast('لطفاً اطلاعات سفارش را کامل کنید');if(!/^\d{10}$/.test(normalizedPostal))return showToast('کد پستی باید ۱۰ رقم باشد');for(const x of cartItems){const p=products[x.productIndex];if(!p||x.qty>Number(p.stock||0))return showToast('موجودی یکی از کالاها کافی نیست')}cartItems.forEach(x=>{products[x.productIndex].stock=Number(products[x.productIndex].stock||0)-x.qty});saveProducts();cartItems=[];saveCart();document.querySelectorAll('body > div').forEach(el=>{if(el.style.zIndex==='9999')el.remove()});showToast('سفارش آزمایشی با روش ارسال '+shipping+' ثبت شد؛ درگاه واقعی در مرحله بعد متصل می‌شود');render();}
 function showToast(t){const x=document.querySelector('#toast');if(!x)return;x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2500)}
 function filterCategory(cat){render(products.filter(p=>p.cat===cat));document.querySelector('#products')?.scrollIntoView({behavior:'smooth'});}
 function resetProducts(){render()}
