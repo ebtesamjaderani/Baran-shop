@@ -193,3 +193,35 @@ footer > div:nth-child(2) a{
   .main-nav{padding:0 12px 9px;}
   footer > div:nth-child(2){gap:9px !important;}
 }
+
+
+/* Final cross-browser polish */
+.site-header{overflow:visible}
+.header-main{min-width:0}
+.logo{height:58px !important;max-height:58px !important;overflow:hidden !important}
+.brand-logo{width:48px !important;height:48px !important;max-width:48px !important;max-height:48px !important;min-width:48px !important;min-height:48px !important;object-fit:contain !important;object-position:center !important}
+.search input{font-family:Tahoma,Arial,sans-serif !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important}
+.search input::placeholder{font-size:12px !important;opacity:1 !important}
+.quick-links{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:11px !important}
+.quick-links a{display:block !important;margin:0 !important;padding:0 !important;line-height:1.9 !important;white-space:nowrap !important}
+.heart{transition:all .15s ease;border:1px solid #e6dfd6 !important;display:grid !important;place-items:center !important;line-height:1 !important}
+.heart.active{color:#a45d52 !important;background:#fff5f3 !important;border-color:#e6c9c3 !important}
+.detail-heart{position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;border:1px solid #e6dfd6;background:#fff;color:#777;font-size:23px;z-index:4;box-shadow:0 3px 12px #00000012}
+.detail-heart.active{color:#a45d52;background:#fff5f3;border-color:#e6c9c3}
+.field-label{display:block;font-size:11px;color:#555;margin-top:7px}
+.gallery-main{height:430px !important;background:#f6f3ee;border-radius:15px;display:grid;place-items:center;position:relative;overflow:hidden}
+.gallery-main img{width:100% !important;height:100% !important;max-width:100% !important;max-height:100% !important;object-fit:contain !important}
+@media(max-width:900px){
+  .header-main{grid-template-columns:180px minmax(0,1fr) auto !important;gap:10px !important}
+  .logo{width:180px !important;max-width:180px !important}
+  .brand-logo{width:46px !important;height:46px !important;max-width:46px !important;max-height:46px !important;min-width:46px !important;min-height:46px !important}
+  .search{min-width:0 !important}
+}
+@media(max-width:600px){
+  .header-main{grid-template-columns:minmax(0,1fr) auto !important;grid-template-rows:auto auto !important}
+  .logo{width:100% !important;max-width:100% !important;height:48px !important}
+  .brand-logo{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;min-width:42px !important;min-height:42px !important}
+  .search{grid-column:1 / -1 !important;grid-row:2 !important}
+  .search input{font-size:12px !important}
+  .gallery-main{height:300px !important}
+}
