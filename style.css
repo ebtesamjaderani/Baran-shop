@@ -27,3 +27,169 @@ footer .footer-logo{margin-bottom:12px}
 .product h3{line-height:1.7}
 @media(max-width:900px){.header-main{gap:14px}.logo{min-width:0}.search{flex:1;min-width:220px}}
 @media(max-width:600px){.brand-logo{width:46px;height:46px;flex-basis:46px}.logo-caption strong{font-size:17px}.search{min-width:0;flex-basis:100%}.search input{font-size:12px}.search button{padding:0 14px}.pic{aspect-ratio:1/1;height:auto!important}.pic img{width:90%;height:90%}}
+
+/* === Final cross-browser layout fixes === */
+html, body { width:100%; max-width:100%; overflow-x:hidden; }
+body { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+
+/* Header: fixed, compact logo area so the logo can never occupy half the page */
+.header-main{
+  width:100%;
+  max-width:1250px;
+  margin:0 auto;
+  padding:10px 20px;
+  display:grid;
+  grid-template-columns:210px minmax(260px,1fr) auto;
+  align-items:center;
+  gap:18px;
+}
+.logo{
+  width:210px;
+  min-width:0;
+  max-width:210px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+.brand-logo{
+  display:block !important;
+  width:52px !important;
+  height:52px !important;
+  min-width:52px !important;
+  max-width:52px !important;
+  min-height:52px !important;
+  max-height:52px !important;
+  flex:0 0 52px !important;
+  object-fit:contain !important;
+  border-radius:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+.logo-caption{min-width:0; overflow:hidden; white-space:nowrap;}
+.logo-caption strong{font-size:19px; line-height:1.3;}
+.logo-caption small{font-size:10px; line-height:1.5;}
+
+/* Search box: fixed button width + safe flex sizing for Firefox/Chrome */
+.search{
+  width:100%;
+  min-width:0 !important;
+  max-width:none;
+  height:46px;
+  display:flex;
+  align-items:stretch;
+  direction:rtl;
+  overflow:hidden;
+}
+.search input{
+  display:block;
+  flex:1 1 auto;
+  min-width:0 !important;
+  width:0;
+  height:44px;
+  padding:0 14px !important;
+  border:0;
+  outline:0;
+  line-height:44px;
+  font-size:13px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  direction:rtl;
+}
+.search input::-webkit-search-cancel-button{display:none;}
+.search button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 78px !important;
+  width:78px !important;
+  min-width:78px !important;
+  max-width:78px !important;
+  height:44px;
+  padding:0 !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  border:0;
+}
+.head-actions{min-width:max-content; display:flex; align-items:center; gap:8px;}
+.account,.cart{white-space:nowrap;}
+
+/* Navigation never forces the page wider */
+.main-nav{width:100%; overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-width:thin;}
+
+/* Product pictures: identical square frames in all modern browsers */
+.pic{
+  width:100% !important;
+  height:auto !important;
+  aspect-ratio:1 / 1 !important;
+  min-height:0 !important;
+  max-height:none !important;
+  display:grid !important;
+  place-items:center !important;
+  overflow:hidden !important;
+}
+.pic img{
+  display:block !important;
+  width:88% !important;
+  height:88% !important;
+  max-width:88% !important;
+  max-height:88% !important;
+  object-fit:contain !important;
+}
+
+/* Quick access links: always separated, including Firefox */
+footer > div:nth-child(2){
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  gap:10px !important;
+}
+footer > div:nth-child(2) h3{margin:0 0 2px !important;}
+footer > div:nth-child(2) a{
+  display:block !important;
+  width:max-content;
+  max-width:100%;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.8 !important;
+  white-space:nowrap;
+}
+
+/* Stable Enamad area. The external seal can be blocked by browser privacy/network,
+   so the text fallback is always available and the box never changes size. */
+#enamad-seal{
+  width:120px !important;
+  min-width:120px !important;
+  height:112px !important;
+  min-height:112px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:6px !important;
+  overflow:hidden !important;
+}
+#enamad-seal a{display:flex !important; width:100%; height:100%; align-items:center; justify-content:center;}
+#enamad-seal img{width:96px !important;height:96px !important;max-width:96px !important;object-fit:contain !important;}
+.enamad-fallback{display:block; width:100%; font-size:10px; line-height:1.7; text-align:center; color:#555;}
+
+@media (max-width:900px){
+  .header-main{grid-template-columns:190px minmax(220px,1fr); gap:12px;}
+  .head-actions{grid-column:1 / -1; grid-row:3; justify-content:flex-start;}
+  .logo{width:190px;max-width:190px;}
+  .search{grid-column:2; grid-row:1;}
+}
+@media (max-width:600px){
+  .header-main{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; padding:9px 12px;}
+  .logo{width:100%;max-width:100%;height:50px;}
+  .brand-logo{width:44px !important;height:44px !important;min-width:44px !important;max-width:44px !important;min-height:44px !important;max-height:44px !important;flex-basis:44px !important;}
+  .logo-caption strong{font-size:16px;}
+  .logo-caption small{font-size:9px;}
+  .head-actions{grid-column:2;grid-row:1; margin:0;}
+  .search{grid-column:1 / -1;grid-row:2;height:44px;}
+  .search input{height:42px;line-height:42px;font-size:12px;padding:0 10px !important;}
+  .search button{height:42px;flex-basis:70px !important;width:70px !important;min-width:70px !important;max-width:70px !important;font-size:12px;}
+  .account,.cart{padding:7px 8px;}
+  .person-icon,.cart-icon{width:26px;height:26px;}
+  .main-nav{padding:0 12px 9px;}
+  footer > div:nth-child(2){gap:9px !important;}
+}
