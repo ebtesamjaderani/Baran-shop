@@ -1,26 +1,280 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مدیریت محصولات | Baranplusss</title>
-<style>*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f7f5fb;color:#27233a}.wrap{max-width:1100px;margin:auto;padding:18px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 5px 20px #0001}h1{font-size:24px}label{display:block;font-weight:700;margin:10px 0 6px}input,textarea,select{width:100%;padding:11px;border:1px solid #ddd6e8;border-radius:10px;font:inherit}textarea{min-height:100px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}button{border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer}.primary{background:#6f42c1;color:#fff}.secondary{background:#eee8f7;color:#432e62}.danger{background:#ffe5e5;color:#a00000}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.status{padding:11px;border-radius:10px;background:#f1ecf8;margin-top:12px;white-space:pre-wrap}.product{border:1px solid #eee5f6;border-radius:14px;padding:14px;margin-top:10px}.head{display:flex;justify-content:space-between;gap:10px;align-items:center}.muted{color:#777;font-size:13px}.editing{border:2px solid #6f42c1}@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.head{flex-direction:column;align-items:stretch}}</style></head>
-<body><div class="wrap"><h1>مدیریت محصولات Baranplusss</h1>
-<div class="card"><label>آدرس Worker / API</label><input id="api" placeholder="https://baranplusss-api.ebtesamjaderani.workers.dev"><div class="muted">آدرس Worker را بدون /api وارد کنید.</div><div class="actions"><button class="primary" onclick="testApi()">تست اتصال</button><button class="secondary" onclick="loadProducts()">بارگذاری محصولات</button></div><div id="status" class="status">آماده</div></div>
-<div class="card" id="formCard"><h2 id="formTitle">افزودن محصول جدید</h2><input type="hidden" id="editId"><div class="grid">
-<div class="full"><label>نام محصول *</label><input id="name"></div><div><label>دسته‌بندی</label><select id="category"><option value="">انتخاب کنید</option><option>خانه و آشپزخانه</option><option>ابزار آشپزخانه</option><option>فلاسک و ماگ</option><option>بانکه و ظروف</option><option>محصولات پلاستیکی</option><option>سایر</option></select></div><div><label>موجودی</label><input id="stock" type="number" min="0"></div><div><label>قیمت</label><input id="price" type="number" min="0"></div><div><label>قیمت قبل از تخفیف</label><input id="old_price" type="number" min="0"></div><div><label>برند</label><input id="brand"></div><div><label>رنگ</label><input id="color"></div><div><label>ابعاد</label><input id="dimensions"></div><div><label>جنس</label><input id="material"></div><div><label>وزن</label><input id="weight"></div><div class="full"><label>توضیحات</label><textarea id="description"></textarea></div><div class="full"><label>آدرس عکس‌ها</label><textarea id="images" placeholder="هر آدرس عکس را در یک خط وارد کنید"></textarea></div></div><div class="actions"><button class="primary" onclick="saveProduct()">ذخیره محصول</button><button class="secondary" onclick="resetForm()">انصراف / محصول جدید</button></div></div>
-<div class="card"><h2>محصولات موجود در دیتابیس</h2><div id="products">برای دیدن محصولات روی «بارگذاری محصولات» بزنید.</div></div></div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدیریت محصولات | Baranplusss</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f7fb;color:#222;font-family:Tahoma,Arial,sans-serif}
+header{background:#fff;border-bottom:1px solid #e5e7eb;padding:18px 20px;position:sticky;top:0;z-index:10}
+.wrap{max-width:1100px;margin:auto}
+h1{margin:0 0 6px;font-size:22px}
+.muted{color:#6b7280;font-size:13px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+button{border:0;border-radius:10px;padding:11px 16px;cursor:pointer;font-family:inherit;font-size:14px}
+.primary{background:#6d4aff;color:#fff}.secondary{background:#e9e7ff;color:#4d35bd}.danger{background:#fee2e2;color:#b91c1c}.gray{background:#eef0f3;color:#333}
+.status{padding:10px 14px;border-radius:10px;background:#eefbf2;color:#176b35;margin-bottom:15px;display:none}
+.status.err{background:#fff0f0;color:#a11}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 3px 14px #00000008}
+.list{max-height:70vh;overflow:auto}
+.item{padding:13px;border:1px solid #eee;border-radius:12px;margin-bottom:9px;cursor:pointer;background:#fff}
+.item.active{border-color:#6d4aff;background:#f7f5ff}
+.item strong{display:block;margin-bottom:5px}
+.item small{color:#777}
+label{display:block;font-size:13px;font-weight:bold;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d9dde5;border-radius:10px;font-family:inherit;font-size:14px;background:#fff}
+textarea{min-height:100px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.photo{position:relative;width:105px;height:105px;border:1px solid #ddd;border-radius:10px;overflow:hidden;background:#fafafa}
+.photo img{width:100%;height:100%;object-fit:contain}
+.photo button{position:absolute;top:4px;left:4px;width:26px;height:26px;padding:0;border-radius:50%;background:#fff;color:#b91c1c;box-shadow:0 1px 5px #0002}
+.empty{color:#777;text-align:center;padding:30px 10px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.list{max-height:none}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<h1>مدیریت محصولات Baranplusss</h1>
+<div class="muted">محصولات از پایگاه داده Cloudflare D1 خوانده و ذخیره می‌شوند.</div>
+</div>
+</header>
+
+<main class="wrap" style="padding:20px 0">
+<div id="status" class="status"></div>
+
+<div class="toolbar">
+<button class="primary" onclick="newProduct()">＋ محصول جدید</button>
+<button class="secondary" onclick="loadProducts()">↻ بروزرسانی محصولات</button>
+</div>
+
+<div class="grid">
+<section class="card">
+<h3 style="margin-top:0">محصولات موجود</h3>
+<div id="productList" class="list"><div class="empty">در حال دریافت محصولات...</div></div>
+</section>
+
+<section class="card">
+<div id="editor">
+<div class="empty">یک محصول را از فهرست انتخاب کنید یا روی «محصول جدید» بزنید.</div>
+</div>
+</section>
+</div>
+</main>
+
 <script>
-const $=id=>document.getElementById(id);let products=[];
-function base(){let v=$('api').value.trim().replace(/\/+$/,'');v=v.replace(/\/api$/i,'');return v}
-function msg(t){$('status').textContent=t}
-function saveBase(){let v=base();if(v)localStorage.setItem('baranplusss_api',v);return v}
-async function api(path,opt={}){const b=saveBase();if(!b)throw Error('آدرس Worker وارد نشده است.');const r=await fetch(b+path,{...opt,cache:'no-store',headers:{'Accept':'application/json','Content-Type':'application/json',...(opt.headers||{})}});const text=await r.text();let d;try{d=JSON.parse(text)}catch(e){throw Error('پاسخ API قابل خواندن نیست. HTTP '+r.status)}if(!r.ok||d.success===false)throw Error((d.message||'خطای API')+' (HTTP '+r.status+')');return d}
-async function testApi(){try{const d=await api('/api/test');msg('اتصال موفق است:\n'+(d.message||'Baranplusss API is working'));}catch(e){msg('خطا در اتصال به API:\n'+e.message)}}
-async function loadProducts(){ $('products').textContent='در حال بارگذاری...';try{const d=await api('/api/products');products=Array.isArray(d.products)?d.products:[];render();msg('محصولات با موفقیت از دیتابیس دریافت شدند.');}catch(e){$('products').textContent='خطا در بارگذاری محصولات:\n'+e.message;msg('خطا در بارگذاری محصولات:\n'+e.message)}}
-function render(){if(!products.length){$('products').innerHTML='<div class="muted">محصولی پیدا نشد.</div>';return}$('products').innerHTML=products.map(p=>`<div class="product"><div class="head"><div><strong>${esc(p.name)}</strong><div class="muted">شناسه: ${p.id} | موجودی: ${p.stock||0} | قیمت: ${Number(p.price||0).toLocaleString('fa-IR')} تومان</div></div><div class="actions"><button class="primary" onclick="editProduct(${Number(p.id)})">ویرایش</button><button class="danger" onclick="deleteProduct(${Number(p.id)})">حذف</button></div></div></div>`).join('')}
-function editProduct(id){const p=products.find(x=>Number(x.id)===id);if(!p)return;$('editId').value=p.id;$('formTitle').textContent='ویرایش محصول شماره '+p.id;for(const k of ['name','category','price','old_price','stock','brand','color','dimensions','material','weight','description'])$(k).value=p[k]??'';let im=[];try{im=JSON.parse(p.images||'[]')}catch(e){}$('images').value=Array.isArray(im)?im.join('\n'):'';$('formCard').classList.add('editing');scrollTo({top:0,behavior:'smooth'})}
-function data(){return{name:$('name').value.trim(),category:$('category').value,price:Number($('price').value)||0,old_price:Number($('old_price').value)||0,stock:Number($('stock').value)||0,brand:$('brand').value.trim(),color:$('color').value.trim(),dimensions:$('dimensions').value.trim(),material:$('material').value.trim(),weight:$('weight').value.trim(),description:$('description').value.trim(),images:$('images').value.split('\n').map(x=>x.trim()).filter(Boolean)}}
-async function saveProduct(){const id=$('editId').value,p=data();if(!p.name)return msg('نام محصول را وارد کنید.');try{await api(id?'/api/products/'+id:'/api/products',{method:id?'PUT':'POST',body:JSON.stringify(p)});msg(id?'محصول با موفقیت ویرایش شد.':'محصول با موفقیت اضافه شد.');resetForm();await loadProducts()}catch(e){msg('خطا در ذخیره محصول:\n'+e.message)}}
-async function deleteProduct(id){const p=products.find(x=>Number(x.id)===id);if(!p||!confirm('محصول «'+p.name+'» حذف شود؟'))return;try{await api('/api/products/'+id,{method:'DELETE'});await loadProducts();msg('محصول حذف شد.')}catch(e){msg('خطا در حذف محصول:\n'+e.message)}}
-function resetForm(){$('editId').value='';$('formTitle').textContent='افزودن محصول جدید';['name','price','old_price','stock','brand','color','dimensions','material','weight','description','images'].forEach(id=>$(id).value='');$('category').value='';$('formCard').classList.remove('editing')}
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-$('api').value=localStorage.getItem('baranplusss_api')||'';
-</script></body></html>
+const API = "https://api.baranplusss.ir";
+let products = [];
+let selectedId = null;
+let images = [];
+
+function showStatus(msg, error=false){
+  const el=document.getElementById("status");
+  el.textContent=msg;
+  el.className="status"+(error?" err":"");
+  el.style.display="block";
+  clearTimeout(window.statusTimer);
+  window.statusTimer=setTimeout(()=>el.style.display="none",4500);
+}
+
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function parseImages(v){
+  if(Array.isArray(v)) return v;
+  if(!v) return [];
+  try{
+    const x=JSON.parse(v);
+    return Array.isArray(x)?x:[];
+  }catch(e){return []}
+}
+
+async function loadProducts(){
+  document.getElementById("productList").innerHTML='<div class="empty">در حال دریافت...</div>';
+  try{
+    const r=await fetch(API+"/api/products");
+    const data=await r.json();
+    if(!data.success) throw new Error(data.message||"خطا در دریافت محصولات");
+    products=data.products||[];
+    renderList();
+    showStatus("محصولات با موفقیت دریافت شدند.");
+  }catch(e){
+    document.getElementById("productList").innerHTML='<div class="empty">خطا در دریافت محصولات</div>';
+    showStatus("خطا: "+e.message,true);
+  }
+}
+
+function renderList(){
+  const el=document.getElementById("productList");
+  if(!products.length){el.innerHTML='<div class="empty">هنوز محصولی ثبت نشده است.</div>';return}
+  el.innerHTML=products.map(p=>`
+    <div class="item ${selectedId===p.id?"active":""}" onclick="editProduct(${p.id})">
+      <strong>${esc(p.name)}</strong>
+      <small>کد ${p.id} · ${Number(p.price||0).toLocaleString("fa-IR")} تومان · موجودی ${Number(p.stock||0).toLocaleString("fa-IR")}</small>
+    </div>`).join("");
+}
+
+function newProduct(){
+  selectedId=null;
+  images=[];
+  renderEditor({
+    name:"",category:"",price:0,old_price:0,stock:0,brand:"",
+    color:"",dimensions:"",material:"",weight:"",description:""
+  },true);
+  renderList();
+}
+
+function editProduct(id){
+  const p=products.find(x=>Number(x.id)===Number(id));
+  if(!p)return;
+  selectedId=p.id;
+  images=parseImages(p.images);
+  renderEditor(p,false);
+  renderList();
+}
+
+function renderEditor(p,isNew){
+  document.getElementById("editor").innerHTML=`
+    <h2 style="margin-top:0">${isNew?"افزودن محصول جدید":"ویرایش محصول #"+esc(p.id)}</h2>
+
+    <label>نام محصول *</label>
+    <input id="f_name" value="${esc(p.name)}">
+
+    <div class="row">
+      <div><label>دسته‌بندی</label><input id="f_category" value="${esc(p.category)}"></div>
+      <div><label>برند</label><input id="f_brand" value="${esc(p.brand)}"></div>
+    </div>
+
+    <div class="row">
+      <div><label>قیمت</label><input id="f_price" type="number" value="${Number(p.price)||0}"></div>
+      <div><label>قیمت قبلی</label><input id="f_old_price" type="number" value="${Number(p.old_price)||0}"></div>
+    </div>
+
+    <div class="row">
+      <div><label>موجودی</label><input id="f_stock" type="number" value="${Number(p.stock)||0}"></div>
+      <div><label>رنگ</label><input id="f_color" value="${esc(p.color)}"></div>
+    </div>
+
+    <div class="row">
+      <div><label>ابعاد</label><input id="f_dimensions" value="${esc(p.dimensions)}"></div>
+      <div><label>جنس</label><input id="f_material" value="${esc(p.material)}"></div>
+    </div>
+
+    <label>وزن</label>
+    <input id="f_weight" value="${esc(p.weight)}">
+
+    <label>توضیحات</label>
+    <textarea id="f_description">${esc(p.description)}</textarea>
+
+    <label>عکس‌های محصول</label>
+    <input id="imageInput" type="file" accept="image/*" multiple onchange="readImages(event)">
+    <div class="muted" style="margin-top:6px">می‌توانی چند عکس را از گالری/کامپیوتر انتخاب کنی. عکس‌های قبلی تا وقتی حذفشان نکنی باقی می‌مانند.</div>
+    <div id="preview" class="preview"></div>
+
+    <div class="actions">
+      <button class="primary" onclick="saveProduct()">${isNew?"ذخیره محصول":"ذخیره تغییرات"}</button>
+      ${!isNew?'<button class="danger" onclick="deleteProduct()">حذف محصول</button>':""}
+      <button class="gray" onclick="loadProducts()">انصراف / بروزرسانی</button>
+    </div>
+  `;
+  renderPreview();
+}
+
+function renderPreview(){
+  const el=document.getElementById("preview");
+  if(!el)return;
+  if(!images.length){el.innerHTML='<div class="muted">هنوز عکسی انتخاب نشده است.</div>';return}
+  el.innerHTML=images.map((src,i)=>`
+    <div class="photo">
+      <img src="${esc(src)}" alt="تصویر محصول">
+      <button onclick="removeImage(${i})" title="حذف">×</button>
+    </div>`).join("");
+}
+
+function removeImage(i){
+  images.splice(i,1);
+  renderPreview();
+}
+
+function readImages(event){
+  const files=[...(event.target.files||[])];
+  if(!files.length)return;
+  let pending=files.length;
+  files.forEach(file=>{
+    if(!file.type.startsWith("image/")){pending--;return}
+    const reader=new FileReader();
+    reader.onload=()=>{images.push(reader.result);pending--;renderPreview()};
+    reader.readAsDataURL(file);
+  });
+  event.target.value="";
+}
+
+function formData(){
+  return {
+    name:document.getElementById("f_name").value.trim(),
+    category:document.getElementById("f_category").value.trim(),
+    price:Number(document.getElementById("f_price").value)||0,
+    old_price:Number(document.getElementById("f_old_price").value)||0,
+    stock:Number(document.getElementById("f_stock").value)||0,
+    brand:document.getElementById("f_brand").value.trim(),
+    color:document.getElementById("f_color").value.trim(),
+    dimensions:document.getElementById("f_dimensions").value.trim(),
+    material:document.getElementById("f_material").value.trim(),
+    weight:document.getElementById("f_weight").value.trim(),
+    description:document.getElementById("f_description").value.trim(),
+    images:images
+  };
+}
+
+async function saveProduct(){
+  const data=formData();
+  if(!data.name){showStatus("نام محصول را وارد کن.",true);return}
+
+  try{
+    const isNew=selectedId===null;
+    const url=isNew?API+"/api/products":API+"/api/products/"+selectedId;
+    const r=await fetch(url,{
+      method:isNew?"POST":"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
+    });
+    const result=await r.json();
+    if(!result.success) throw new Error(result.message||"خطا در ذخیره محصول");
+
+    showStatus(isNew?"محصول با موفقیت اضافه شد.":"تغییرات محصول با موفقیت ذخیره شد.");
+    selectedId=isNew?result.id:selectedId;
+    await loadProducts();
+    if(selectedId) editProduct(selectedId);
+  }catch(e){
+    showStatus("خطا در ذخیره: "+e.message,true);
+  }
+}
+
+async function deleteProduct(){
+  if(!selectedId)return;
+  const p=products.find(x=>Number(x.id)===Number(selectedId));
+  if(!confirm("آیا از حذف «"+(p?.name||"این محصول")+"» مطمئنی؟"))return;
+
+  try{
+    const r=await fetch(API+"/api/products/"+selectedId,{method:"DELETE"});
+    const result=await r.json();
+    if(!result.success) throw new Error(result.message||"خطا در حذف");
+    selectedId=null;
+    images=[];
+    showStatus("محصول با موفقیت حذف شد.");
+    await loadProducts();
+    document.getElementById("editor").innerHTML='<div class="empty">محصول حذف شد. محصول دیگری را انتخاب کنید.</div>';
+  }catch(e){
+    showStatus("خطا در حذف: "+e.message,true);
+  }
+}
+
+loadProducts();
+</script>
+</body>
+</html>
