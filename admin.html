@@ -13,7 +13,7 @@ h1{margin:0 0 6px;font-size:22px}
 .muted{color:#6b7280;font-size:13px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
 button{border:0;border-radius:10px;padding:11px 16px;cursor:pointer;font-family:inherit;font-size:14px}
-.primary{background:#6d4aff;color:#fff}.secondary{background:#e9e7ff;color:#4d35bd}.danger{background:#fee2e2;color:#b91c1c}.gray{background:#eef0f3;color:#333}
+.primary{background:#6d4aff;color:#fff}.primary:disabled{opacity:.6;cursor:not-allowed}.secondary{background:#e9e7ff;color:#4d35bd}.danger{background:#fee2e2;color:#b91c1c}.gray{background:#eef0f3;color:#333}
 .status{padding:10px 14px;border-radius:10px;background:#eefbf2;color:#176b35;margin-bottom:15px;display:none}
 .status.err{background:#fff0f0;color:#a11}
 .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
@@ -201,17 +201,41 @@ function removeImage(i){
   renderPreview();
 }
 
-function readImages(event){
-  const files=[...(event.target.files||[])];
-  if(!files.length)return;
-  let pending=files.length;
-  files.forEach(file=>{
-    if(!file.type.startsWith("image/")){pending--;return}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
     const reader=new FileReader();
-    reader.onload=()=>{images.push(reader.result);pending--;renderPreview()};
+    reader.onerror=()=>reject(new Error("خواندن تصویر ناموفق بود"));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("تصویر قابل پردازش نیست"));
+      img.onload=()=>{
+        const max=1200;
+        const scale=Math.min(1,max/Math.max(img.width,img.height));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",.78));
+      };
+      img.src=reader.result;
+    };
     reader.readAsDataURL(file);
   });
-  event.target.value="";
+}
+
+async function readImages(event){
+  const files=[...(event.target.files||[])].filter(f=>f.type.startsWith("image/"));
+  if(!files.length)return;
+  try{
+    showStatus("در حال آماده‌سازی تصاویر...");
+    for(const file of files){
+      images.push(await compressImage(file));
+      renderPreview();
+    }
+    showStatus("تصاویر آماده شدند. حالا روی «ذخیره اطلاعات» بزن.");
+  }catch(e){showStatus("خطا در آماده‌سازی تصویر: "+e.message,true)}
+  finally{event.target.value=""}
 }
 
 function formData(){
@@ -232,27 +256,28 @@ function formData(){
 }
 
 async function saveProduct(){
+  if(saving)return;
   const data=formData();
   if(!data.name){showStatus("نام محصول را وارد کن.",true);return}
-
+  const btn=document.querySelector("button.primary");
+  const oldText=btn?btn.innerHTML:"";
+  saving=true;
+  if(btn){btn.disabled=true;btn.innerHTML="⏳ در حال ذخیره..."}
+  showStatus("در حال ذخیره اطلاعات محصول...");
   try{
     const isNew=selectedId===null;
     const url=isNew?API+"/api/products":API+"/api/products/"+selectedId;
-    const r=await fetch(url,{
-      method:isNew?"POST":"PUT",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
-    });
-    const result=await r.json();
-    if(!result.success) throw new Error(result.message||"خطا در ذخیره محصول");
-
+    const r=await fetch(url,{method:isNew?"POST":"PUT",headers:{"Content-Type":"application/json","Accept":"application/json"},cache:"no-store",body:JSON.stringify(data)});
+    const text=await r.text();
+    let result;
+    try{result=JSON.parse(text)}catch{throw new Error("پاسخ نامعتبر از سرور دریافت شد: "+text.slice(0,160))}
+    if(!r.ok||!result.success)throw new Error(result.message||("خطای سرور: "+r.status));
     showStatus(isNew?"محصول با موفقیت اضافه شد.":"تغییرات محصول با موفقیت ذخیره شد.");
     selectedId=isNew?result.id:selectedId;
     await loadProducts();
-    if(selectedId) editProduct(selectedId);
-  }catch(e){
-    showStatus("خطا در ذخیره: "+e.message,true);
-  }
+    if(selectedId)editProduct(selectedId);
+  }catch(e){console.error(e);showStatus("خطا در ذخیره: "+(e.message||e),true)}
+  finally{saving=false;if(btn){btn.disabled=false;btn.innerHTML=oldText||"💾 ذخیره اطلاعات"}}
 }
 
 async function deleteProduct(){
